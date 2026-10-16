@@ -26,9 +26,8 @@ public class LogicaFake {
 
     private static final String ETIQUETA_LOG = "LogicaFake";
 
-    // IP local de tu PC en la Wi-Fi (para que el móvil físico pueda conectarse por la misma red)
-    // Si usas el emulador de Android Studio en el propio PC, usarías "http://10.0.2.2:8080"
-    private String servidorURL = "http://10.0.2.2:8080";
+    // Dirección predeterminada para el emulador Android; en un móvil físico se configura desde la app.
+    private volatile String servidorURL = "http://10.0.2.2:8080";
 
     private final ExecutorService ejecutor = Executors.newSingleThreadExecutor();
     private final Handler handlerPrincipal = new Handler(Looper.getMainLooper());

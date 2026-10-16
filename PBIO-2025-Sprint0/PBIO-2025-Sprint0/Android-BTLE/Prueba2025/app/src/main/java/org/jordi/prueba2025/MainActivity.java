@@ -1,13 +1,16 @@
 package org.jordi.prueba2025;
 
 import android.bluetooth.le.ScanSettings;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 
 import android.support.v4.content.ContextCompat;
 
 import android.os.Bundle;
 import android.os.Build;
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -17,6 +20,9 @@ import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.text.InputType;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int CODIGO_PETICION_PERMISOS = 11223344;
     private static final int FABRICANTE_APPLE = 0x004c;
     private static final String UUID_BEACON_PROYECTO = "EPSG-GTI-PROY-3A";
+    private static final String PREFERENCIAS_REST = "preferencias_rest";
+    private static final String CLAVE_SERVIDOR_REST = "servidor_url";
 
     // --------------------------------------------------------------
     // --------------------------------------------------------------
@@ -42,6 +50,48 @@ public class MainActivity extends AppCompatActivity {
 
     private LogicaFake laLogicaFake = new LogicaFake();
     private int ultimoContadorProcesado = -1;
+
+    private void mostrarConfiguracionServidorREST() {
+        EditText campoURL = new EditText(this);
+        campoURL.setSingleLine(true);
+        campoURL.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        campoURL.setText(this.laLogicaFake.getServidorURL());
+        campoURL.setSelection(campoURL.getText().length());
+
+        new AlertDialog.Builder(this)
+                .setTitle("Servidor REST")
+                .setMessage("Introduce la URL base, por ejemplo http://192.168.1.10:8080")
+                .setView(campoURL)
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Guardar", (dialog, which) -> {
+                    String url = campoURL.getText().toString().trim();
+                    while (url.endsWith("/")) {
+                        url = url.substring(0, url.length() - 1);
+                    }
+
+                    Uri uri = Uri.parse(url);
+                    String scheme = uri.getScheme();
+                    if (uri.getHost() == null
+                            || !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                            || (uri.getPath() != null && !uri.getPath().isEmpty())) {
+                        Toast.makeText(this, "Introduce una URL base HTTP(S) válida.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    this.laLogicaFake.setServidorURL(url);
+                    getSharedPreferences(PREFERENCIAS_REST, MODE_PRIVATE)
+                            .edit()
+                            .putString(CLAVE_SERVIDOR_REST, url)
+                            .apply();
+                    Toast.makeText(this, "Servidor REST guardado: " + url, Toast.LENGTH_LONG).show();
+                    Log.i(ETIQUETA_LOG, "Servidor REST configurado: " + url);
+                })
+                .show();
+    }
+
+    public void botonConfigurarServidorRESTPulsado(View v) {
+        mostrarConfiguracionServidorREST();
+    }
 
     private String[] permisosBTLERequeridos() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -322,6 +372,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.d(ETIQUETA_LOG, " onCreate(): empieza ");
+
+        String servidorGuardado = getSharedPreferences(PREFERENCIAS_REST, MODE_PRIVATE)
+                .getString(CLAVE_SERVIDOR_REST, null);
+        if (servidorGuardado != null) {
+            this.laLogicaFake.setServidorURL(servidorGuardado);
+        }
+        Log.i(ETIQUETA_LOG, "Servidor REST actual: " + this.laLogicaFake.getServidorURL());
 
         inicializarBlueTooth();
 

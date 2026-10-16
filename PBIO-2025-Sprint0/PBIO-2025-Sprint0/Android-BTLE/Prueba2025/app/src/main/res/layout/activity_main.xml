@@ -29,4 +29,11 @@ tools:context=".MainActivity">
         android:onClick="botonBuscarNuestroDispositivoBTLEPulsado"
         android:text="Buscar nuestro dispositivo  BTLE" />
 
+    <Button
+        android:id="@+id/botonConfigurarServidorREST"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="botonConfigurarServidorRESTPulsado"
+        android:text="Configurar servidor REST" />
+
 </android.widget.LinearLayout>
