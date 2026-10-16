@@ -1,0 +1,32 @@
+# Local IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+._*
+__MACOSX/
+
+# Gradle build outputs and local configuration
+**/.gradle/
+**/build/
+**/local.properties
+
+# Generated archives and application packages
+*.apk
+*.aab
+*.tgz
+*.zip
+
+# Local databases and measurement data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Local credentials and signing keys
+.env
+.env.*
+*.jks
+*.keystore
+*.pem
+*.p12
